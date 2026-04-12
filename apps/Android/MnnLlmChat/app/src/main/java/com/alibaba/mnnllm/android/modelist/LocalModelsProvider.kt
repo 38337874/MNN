@@ -12,7 +12,7 @@ object LocalModelsProvider {
     fun getLocalModels(): MutableList<ModelItem> {
         val result = mutableListOf<ModelItem>()
         try {
-            val modelsDir = File("/data/local/tmp/mnn_models/")
+            val modelsDir = File("/sdcard/MNN_Models/")
             if (modelsDir.exists() && modelsDir.isDirectory) {
                 modelsDir.listFiles()?.forEach { modelDir ->
                     if (modelDir.isDirectory && File(modelDir, "config.json").exists()) {
@@ -23,7 +23,7 @@ object LocalModelsProvider {
                 }
             }
         } catch (e: Exception) {
-            Log.e("LocalModelsProvider", "Failed to load models from /data/local/tmp/mnn_models/", e)
+            Log.e("LocalModelsProvider", "Failed to load models from /sdcard/MNN_Models/", e)
         }
         return result
     }
