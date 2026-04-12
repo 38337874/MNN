@@ -1,0 +1,47 @@
+  name: Build MNN Chat APK
+
+  on:
+     workflow_dispatch:
+
+   jobs:
+     build:
+       runs-on: ubuntu-latest
+       timeout-minutes: 120
+
+       steps:
+         - name: Checkout
+           uses: actions/checkout@v4
+           with:
+             submodules: recursive
+
+         - name: Setup JDK 17
+           uses: actions/setup-java@v4
+           with:
+             java-version: '17'
+             distribution: 'temurin'
+
+         - name: Setup Android SDK
+           uses: android-actions/setup-android@v3
+
+         - name: Install NDK
+           run: yes | sdkmanager "ndk;27.2.12479018"
+
+         - name: Build MNN
+           run: |
+             export ANDROID_NDK=$ANDROID_HOME/ndk/27.2.12479018
+             cd project/android
+             mkdir -p build_64 && cd build_64
+             ../build_64.sh "-DMNN_LOW_MEMORY=true"
+             make install -j$(nproc)
+
+         - name: Build APK
+           run: |
+             cd apps/Android/MnnLlmChat
+             chmod +x gradlew
+             ./gradlew assembleDebug
+
+         - name: Upload APK
+           uses: actions/upload-artifact@v4
+           with:
+             name: mnn-chat-apk
+             path: apps/Android/MnnLlmChat/app/build/outputs/apk/debug/*.apk
