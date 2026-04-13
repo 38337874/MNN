@@ -30,6 +30,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.app.ActivityCompat
 import android.Manifest
 import android.os.Build
+import android.provider.Settings
+import android.content.Intent
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import com.alibaba.mls.api.download.ModelDownloadManager
@@ -607,17 +609,16 @@ class MainActivity : AppCompatActivity(), MainFragmentManager.FragmentLifecycleL
     
     private fun requestStoragePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // Android 11+
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) 
-                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(
-                        Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE
-                    ),
-                    REQUEST_STORAGE_PERMISSION
-                )
+            // Android 11+ 需要 MANAGE_EXTERNAL_STORAGE 权限
+            if (!android.os.Environment.isExternalStorageManager()) {
+                try {
+                    val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                    intent.data = android.net.Uri.parse("package:$packageName")
+                    startActivity(intent)
+                }
             }
         } else {
             // Android 10 及以下
