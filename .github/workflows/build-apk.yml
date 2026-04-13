@@ -26,23 +26,6 @@ jobs:
           chmod +x build.sh
           chmod +x ../../../project/android/build_64.sh
           ./build.sh
-      - name: Fix libraries for SEP_BUILD=OFF
-        run: |
-          # When MNN_SEP_BUILD=OFF, only libMNN.so is generated
-          # APK expects libllm.so and libMNN_Express.so separately
-          # Create symlinks to libMNN.so
-          cd project/android/build_64/lib
-          if [ ! -f libllm.so ]; then
-            ln -s libMNN.so libllm.so
-          fi
-          if [ ! -f libMNN_Express.so ]; then
-            ln -s libMNN.so libMNN_Express.so
-          fi
-          ls -la
-      - name: Rebuild APK
-        run: |
-          cd apps/Android/MnnLlmChat
-          ./gradlew assembleStandardDebug
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
