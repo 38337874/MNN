@@ -27,6 +27,9 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.ActionBarDrawerToggle
 import com.alibaba.mnnllm.android.widgets.FullScreenDrawerLayout
 import androidx.core.content.ContextCompat
+import androidx.core.app.ActivityCompat
+import android.Manifest
+import android.os.Build
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import com.alibaba.mls.api.download.ModelDownloadManager
@@ -402,6 +405,9 @@ class MainActivity : AppCompatActivity(), MainFragmentManager.FragmentLifecycleL
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
+        // Request storage permission for local models
+        requestStoragePermission()
+        
         // 初始化下载源设置，同步到 ModelSources
         val provider = MainSettings.getDownloadProvider(this)
         ModelSources.setSourceType(provider)
@@ -599,10 +605,41 @@ class MainActivity : AppCompatActivity(), MainFragmentManager.FragmentLifecycleL
         dialog.show(supportFragmentManager, PrivacyPolicyDialogFragment.TAG)
     }
     
+    private fun requestStoragePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // Android 11+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) 
+                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    ),
+                    REQUEST_STORAGE_PERMISSION
+                )
+            }
+        } else {
+            // Android 10 及以下
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) 
+                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    ),
+                    REQUEST_STORAGE_PERMISSION
+                )
+            }
+        }
+    }
+    
     companion object {
         const val TAG: String = "MainActivity"
         const val EXTRA_SELECT_TAB = "com.alibaba.mnnllm.android.select_tab"
         const val TAB_MODEL_MARKET = "model_market"
+        const val REQUEST_STORAGE_PERMISSION = 1001
         
         // Control whether to show privacy policy agreement dialog
         const val ENABLE_PRIVACY_POLICY_CHECK = false
