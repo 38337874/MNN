@@ -21,5 +21,14 @@ cd build_64
 -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-z,max-page-size=16384' \
 -DCMAKE_INSTALL_PREFIX=."
 make install
+# Create symlinks for SEP_BUILD=OFF (all in one libMNN.so)
+cd lib
+if [ ! -f libllm.so ]; then
+    ln -s libMNN.so libllm.so
+fi
+if [ ! -f libMNN_Express.so ]; then
+    ln -s libMNN.so libMNN_Express.so
+fi
+cd ..
 cd ../../../apps/Android/MnnLlmChat/
 ./gradlew assembleStandardDebug
