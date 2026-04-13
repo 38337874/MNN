@@ -19,22 +19,13 @@ jobs:
         uses: android-actions/setup-android@v3
       - name: Install NDK
         run: yes | sdkmanager "ndk;27.2.12479018"
-      - name: Build MNN Library
+      - name: Build with official script
         run: |
           export ANDROID_NDK=$ANDROID_HOME/ndk/27.2.12479018
-          cd project/android
-          mkdir -p build_64
-          cd build_64
-          ../build_64.sh -DMNN_LOW_MEMORY=true -DMNN_CPU_WEIGHT_DEQUANT_GEMM=true -DMNN_BUILD_LLM=true -DMNN_SUPPORT_TRANSFORMER_FUSE=true -DMNN_ARM82=true -DMNN_USE_LOGCAT=true -DLLM_SUPPORT_VISION=true -DLLM_SUPPORT_AUDIO=true -DMNN_BUILD_AUDIO=true -DBUILD_PLUGIN=ON -DMNN_QNN=OFF -DMNN_SUPPORT_BF16=ON -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-z,max-page-size=16384' -DCMAKE_INSTALL_PREFIX=.
-          make install
-          # Manually copy llm library (not included in install)
-          mkdir -p lib
-          cp libllm.so lib/
-      - name: Build APK
-        run: |
           cd apps/Android/MnnLlmChat
-          chmod +x gradlew
-          ./gradlew assembleStandardDebug
+          chmod +x build.sh
+          chmod +x ../../../project/android/build_64.sh
+          ./build.sh
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
